@@ -1,3 +1,5 @@
+from typing import Union
+
 def read_data(src):
     pass
 
@@ -10,6 +12,7 @@ class operation():
         self.num_workers = 0
         self.availability = {}
         self.schedule = None
+        self.min_hours = None
 
     def set_operating_hours(self, dt:dict) -> None:
         self.operating_hours = dt
@@ -19,6 +22,12 @@ class operation():
 
     def set_availability(self, worker:int, dt:dict) -> None:
         self.availability[worker] = dt
+
+    def set_min_hours(self, hours:Union[int, dict]) -> None:
+        if isinstance(hours, int):
+            self.min_hours=hours
+        else:
+            self.min_hours=hours
 
     def fit(self) -> None:
         pass
