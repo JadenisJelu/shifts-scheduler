@@ -1,4 +1,5 @@
 from typing import Union
+import numpy as np
 
 def read_data(src):
     pass
@@ -9,15 +10,33 @@ def set_contrainsts(constraints):
 worker = {1: Ali, 2: Ahsan, 3: Ahmad}
 
 availability = {worker:{day: tuple of start and end}}'''
+
+class Schedule():
+    pass
+
 class Operation():
     def __init__(self) -> None:
         self.operating_hours = {}
         #self.num_workers = 0
         self.availability = {}
-        self.schedule = None
+        #self.granularity = 'hour'
+        self.schedule = None # modify schedule in place
         self.min_hours = None
         self.workers = {}
         self.worker_names = set()
+
+        self._instatiate_schedule()
+
+    def _instatiate_schedule(self, granularity:str ='hour') -> None:
+        if granularity == 'hour':
+            if not self.schedule:
+                ls = [0] * 24
+                sches = []
+                for i in range(1, 8):
+                    #hr = self.operating_hours[i]
+                    #ls = [0] * (hr[1] - hr[0])
+                    sches.append(ls)
+                self.schedule = sches
 
     def set_operating_hours(self, hours:Union[tuple, dict]) -> None:
         if isinstance(hours, tuple):
@@ -73,6 +92,34 @@ class Operation():
 
     def fit(self) -> None:
         pass
+
+    def is_valid_state(self, state):
+        '''given timetable, check if valid'''
+        # check if it is a valid solution
+        # validate all workers present
+        # validate all workers achieve min time
+        # validate all schedule time slot filled
+
+        return True
+
+    def get_candidates(self, state):
+        return []
+
+    def search(self, state, solutions):
+        if self.is_valid_state(state):
+            solutions.append(state.copy())
+            # return
+
+        for candidate in self.get_candidates(state):
+            state.add(candidate)
+            self.search(state, solutions)
+            state.remove(candidate)
+
+    def solve(self):
+        solutions = []
+        state = set()
+        self.search(state, solutions)
+        return solutions
 
 if __name__ == '__main__':
     storeA = Operation()
