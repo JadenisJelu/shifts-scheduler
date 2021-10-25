@@ -27,6 +27,9 @@ class Operation():
 
         self._instatiate_schedule()
 
+    def __repr__(self) -> str:
+        return f"This operation operates on {self.operating_hours} with {self.worker_names}."
+
     def _instatiate_schedule(self, granularity:str ='hour') -> None:
         if granularity == 'hour':
             if not self.schedule:
@@ -93,13 +96,18 @@ class Operation():
     def fit(self) -> None:
         pass
 
-    def is_valid_state(self, state):
-        '''given timetable, check if valid'''
+    def is_valid_state(self, schedule) -> bool:
+        '''given schedule, check if valid'''
         # check if it is a valid solution
         # validate all workers present
         # validate all workers achieve min time
         # validate all schedule time slot filled
+        workers = set()
+        for day in schedule:
+            workers = workers | set(day)
 
+        if len(workers) != len(self.worker_names):
+            return False
         return True
 
     def get_candidates(self, state):
@@ -127,3 +135,4 @@ if __name__ == '__main__':
     storeA.add_workers('Ahmad', '0123')
     storeA.add_workers('Ali', '0123')
     storeA.add_workers('Ahsan', '0123')
+    print(storeA)
