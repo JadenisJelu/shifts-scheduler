@@ -17,6 +17,7 @@ class Schedule():
 class Operation():
     def __init__(self) -> None:
         self.operating_hours = {}
+        self.shift_hours = None
         #self.num_workers = 0
         self.availability = {}
         #self.granularity = 'hour'
@@ -24,6 +25,7 @@ class Operation():
         self.min_hours = None
         self.workers = {}
         self.worker_names = set()
+        self.blocks = None
 
         self._instatiate_schedule()
 
@@ -54,6 +56,8 @@ class Operation():
 
     # def set_num_workers(self, num:int) -> None:
     #     self.num_workers = num
+    def set_shift_hours(self, hours:Union[dict, int]) -> None:
+        self.shift_hours = hours 
 
     def set_availability(self, worker:int, dt:dict) -> None:
         self.availability[worker] = dt
@@ -63,6 +67,20 @@ class Operation():
             self.min_hours=hours
         else:
             self.min_hours=hours
+
+    def create_blocks(self) -> None:
+        '''create blocks for scheduling'''
+        #######'''not yet done'''
+        ls = [None] * 7
+        start, end = self.operating_hours
+        curr = start
+        ls_blocks = []
+        while curr != end:
+            step = min(curr + self.shift_hours, end)
+            ls_blocks.append((curr, step))
+            curr = step
+        for i, val in enumerate(ls):
+            ls[i] = ls_blocks
 
     def add_workers(self, name:str, contact:int) -> None:
         name = name.lower()
@@ -135,4 +153,10 @@ if __name__ == '__main__':
     storeA.add_workers('Ahmad', '0123')
     storeA.add_workers('Ali', '0123')
     storeA.add_workers('Ahsan', '0123')
-    print(storeA)
+    storeA.set_availability(0, 24)
+    storeA.set_availability(1, 24)
+    storeA.set_availability(2, 24) # take list as input too
+    storeA.set_operating_hours((8, 20))
+    storeA.set_shift_hours(6)
+    print(storeA.availability)
+    print(np.array(storeA.schedule))
