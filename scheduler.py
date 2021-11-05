@@ -67,6 +67,20 @@ class Operation():
             self.min_hours=hours
         else:
             self.min_hours=hours
+    
+    def worker_available(self, hours:tuple, worker:int, day:int) -> bool:
+        avail_hrs = self.availability[worker]
+        start, end = hours
+        if isinstance(avail_hrs, int):
+            if 0 <= start and avail_hrs >= end:
+                return True
+        elif isinstance(avail_hrs, tuple):
+            if avail_hrs[0] <= start and avail_hrs[1] >= end:
+                return True
+        elif isinstance(avail_hrs, dict):
+            if avail_hrs[day][0] <= start and avail_hrs[day][1] >= end:
+                return True
+        return False
 
     def create_blocks(self) -> None:
         '''create blocks for scheduling'''
@@ -76,12 +90,12 @@ class Operation():
             start, end = self.operating_hours[i+1]
             curr = start
             # create daily block
-            ls_blocks = []
+            dt_block = {}
             while curr != end:
                 step = min(curr + self.shift_hours, end)
-                ls_blocks.append((curr, step))
+                dt_block[(curr, step)] = set([worker for worker in self.workers if self.worker_available((curr, step), worker, i)])
                 curr = step
-            ls[i] = ls_blocks
+            ls[i] = dt_block
         print(ls)
 
     def add_workers(self, name:str, contact:int) -> None:
@@ -162,4 +176,4 @@ if __name__ == '__main__':
     storeA.set_shift_hours(6)
     storeA.create_blocks()
     print(storeA.availability)
-    print(np.array(storeA.schedule))
+    #print(np.array(storeA.schedule))
