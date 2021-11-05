@@ -72,15 +72,17 @@ class Operation():
         '''create blocks for scheduling'''
         #######'''not yet done'''
         ls = [None] * 7
-        start, end = self.operating_hours
-        curr = start
-        ls_blocks = []
-        while curr != end:
-            step = min(curr + self.shift_hours, end)
-            ls_blocks.append((curr, step))
-            curr = step
         for i, val in enumerate(ls):
+            start, end = self.operating_hours[i+1]
+            curr = start
+            # create daily block
+            ls_blocks = []
+            while curr != end:
+                step = min(curr + self.shift_hours, end)
+                ls_blocks.append((curr, step))
+                curr = step
             ls[i] = ls_blocks
+        print(ls)
 
     def add_workers(self, name:str, contact:int) -> None:
         name = name.lower()
@@ -158,5 +160,6 @@ if __name__ == '__main__':
     storeA.set_availability(2, 24) # take list as input too
     storeA.set_operating_hours((8, 20))
     storeA.set_shift_hours(6)
+    storeA.create_blocks()
     print(storeA.availability)
     print(np.array(storeA.schedule))
