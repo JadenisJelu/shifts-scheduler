@@ -11,8 +11,8 @@ How to use it:
 6. Call scheduler to schedule
 7. Call scheduler viewer
 
-Example output:
-![Output in terminal](https://github.com/JadenisJelu/shifts-scheduler/blob/main/example%20output.png)
+Example output in terminal:
+![](https://github.com/JadenisJelu/shifts-scheduler/blob/main/example%20output.png)
 
 What it can do:
 - assign equal shifts for workers
