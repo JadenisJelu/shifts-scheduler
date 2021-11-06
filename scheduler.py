@@ -205,19 +205,21 @@ class Operation():
         state = set()
         self.search(state, solutions)
         return solutions """
+    
+    def view_schedule(self) -> None:
+        import pprint 
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(storeA.schedule)
 
 if __name__ == '__main__':
     storeA = Operation()
-    storeA.set_operating_hours((8, 22))
+    storeA.set_operating_hours((8, 24))
+    storeA.set_shift_hours(8)
     storeA.add_workers('Ahmad', '0123')
     storeA.add_workers('Ali', '0123')
     storeA.add_workers('Ahsan', '0123')
     storeA.set_availability(0, 24)
     storeA.set_availability(1, 24)
     storeA.set_availability(2, 24) # take list as input too
-    storeA.set_operating_hours((8, 24))
-    storeA.set_shift_hours(8)
     storeA.scheduler()
-    import pprint 
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(storeA.schedule)
+    storeA.view_schedule()
