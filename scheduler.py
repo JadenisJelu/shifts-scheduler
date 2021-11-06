@@ -1,5 +1,6 @@
 from typing import Union
 import numpy as np
+import random
 
 def read_data(src):
     pass
@@ -33,6 +34,7 @@ class Operation():
         return f"This operation operates on {self.operating_hours} with {self.worker_names}."
 
     def _instatiate_schedule(self, granularity:str ='hour') -> None:
+        '''likely depreceated'''
         if granularity == 'hour':
             if not self.schedule:
                 ls = [0] * 24
@@ -81,22 +83,62 @@ class Operation():
             if avail_hrs[day][0] <= start and avail_hrs[day][1] >= end:
                 return True
         return False
-
-    def create_blocks(self) -> None:
+    
+    def create_blocks(self) -> dict:
         '''create blocks for scheduling'''
-        #######'''not yet done'''
-        ls = [None] * 7
-        for i, val in enumerate(ls):
-            start, end = self.operating_hours[i+1]
+        blocks_dt = {}
+        i = 0
+        for day in range(7):
+            start, end = self.operating_hours[day+1]
             curr = start
             # create daily block
-            dt_block = {}
             while curr != end:
                 step = min(curr + self.shift_hours, end)
-                dt_block[(curr, step)] = set([worker for worker in self.workers if self.worker_available((curr, step), worker, i)])
+                avail_workers = set([worker for worker in self.workers if self.worker_available((curr, step), worker, day)])
+                blocks_dt[i] = [(day, (curr, step)), avail_workers]
+                i += 1
                 curr = step
-            ls[i] = dt_block
-        print(ls)
+        del i
+        return blocks_dt
+
+    @staticmethod
+    def select_random(worker_shifts:dict) -> bool:
+        worker = random.choice(list(worker_shifts.keys()))
+        worker_shifts[worker] -= 1
+        if worker_shifts[worker] == 0:
+            del worker_shifts[worker]
+        return worker, worker_shifts
+
+    def scheduler(self) -> None:
+        # create blocks
+        blocks_dt = self.create_blocks()
+
+        # create max shifts
+        shifts = len(blocks_dt.keys())
+        workers = len(self.workers.keys())
+        worker_shifts = {worker: 0 for worker in self.workers}
+        for shift in range(shifts):
+            worker_shifts[shift%workers] += 1
+
+        # scheduler
+        np.random.seed(23)
+        for i in range(shifts):
+            # place 1 worker
+            worker, worker_shifts = self.select_random(worker_shifts)
+            blocks_dt[i][1] = worker
+        
+        blocks_dt = self._beauty_parser(blocks_dt)
+        self.schedule = blocks_dt
+
+    @staticmethod
+    def _beauty_parser(dt:dict) -> dict:
+        tmp = {}
+        for i, ((key, hours), worker) in dt.items():
+            if key in tmp:
+                tmp[key][hours] = worker
+            else:
+                tmp[key] = {hours: worker}
+        return tmp
 
     def add_workers(self, name:str, contact:int) -> None:
         name = name.lower()
@@ -127,7 +169,8 @@ class Operation():
         else:
             return False
 
-    def fit(self) -> None:
+    # dynamic backtracking approach for cleaner code
+    """ def fit(self) -> None:
         pass
 
     def is_valid_state(self, schedule) -> bool:
@@ -161,7 +204,7 @@ class Operation():
         solutions = []
         state = set()
         self.search(state, solutions)
-        return solutions
+        return solutions """
 
 if __name__ == '__main__':
     storeA = Operation()
@@ -172,8 +215,9 @@ if __name__ == '__main__':
     storeA.set_availability(0, 24)
     storeA.set_availability(1, 24)
     storeA.set_availability(2, 24) # take list as input too
-    storeA.set_operating_hours((8, 20))
-    storeA.set_shift_hours(6)
-    storeA.create_blocks()
-    print(storeA.availability)
-    #print(np.array(storeA.schedule))
+    storeA.set_operating_hours((8, 24))
+    storeA.set_shift_hours(8)
+    storeA.scheduler()
+    import pprint 
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(storeA.schedule)
