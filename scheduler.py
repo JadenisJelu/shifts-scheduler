@@ -1,30 +1,21 @@
 from typing import Union
 import numpy as np
 import random
-
-def read_data(src):
-    pass
-
-def set_contrainsts(constraints):
-    pass
 '''
 worker = {1: Ali, 2: Ahsan, 3: Ahmad}
 
 availability = {worker:{day: tuple of start and end}}'''
 
-class Schedule():
-    pass
-
 class Operation():
     def __init__(self) -> None:
         self.operating_hours = {}
         self.shift_hours = None
-        #self.num_workers = 0
         self.availability = {}
         #self.granularity = 'hour'
         self.schedule = None # modify schedule in place
         self.min_hours = None
         self.workers = {}
+        self._reversed_workers = {}
         self.worker_names = set()
         self.blocks = None
 
@@ -56,13 +47,15 @@ class Operation():
                 else:
                     self.operating_hours[day] = None
 
-    # def set_num_workers(self, num:int) -> None:
-    #     self.num_workers = num
     def set_shift_hours(self, hours:Union[dict, int]) -> None:
         self.shift_hours = hours 
 
-    def set_availability(self, worker:int, dt:dict) -> None:
-        self.availability[worker] = dt
+    def set_availability(self, worker:str, dt:dict) -> None:
+        worker = worker.lower()
+        if worker not in self.worker_names:
+            raise Exception("Worker doesn't exist, try add worker.")
+        worker_id = self._reversed_workers[worker]
+        self.availability[worker_id] = dt
 
     def set_min_hours(self, hours:Union[int, dict]) -> None:
         if isinstance(hours, int):
@@ -140,7 +133,7 @@ class Operation():
                 tmp[key] = {hours: worker}
         return tmp
 
-    def add_workers(self, name:str, contact:int) -> None:
+    def add_workers(self, name:str, contact:int = None) -> None:
         name = name.lower()
         if name in self.worker_names:
             raise Exception("Worker exists")
@@ -150,6 +143,7 @@ class Operation():
             else:
                 id = 0
             self.workers[id] = (name, contact)
+            self._reversed_workers[name] = id
             self.worker_names.add(name)
 
 
@@ -213,13 +207,13 @@ class Operation():
 
 if __name__ == '__main__':
     storeA = Operation()
-    storeA.set_operating_hours((8, 24))
-    storeA.set_shift_hours(8)
-    storeA.add_workers('Ahmad', '0123')
+    storeA.set_operating_hours((8, 24)) # daily allocation?
+    storeA.set_shift_hours(8) # dynamic shift?????
+    storeA.add_workers('Ahmad', '0123') # add list / dict options?
     storeA.add_workers('Ali', '0123')
     storeA.add_workers('Ahsan', '0123')
-    storeA.set_availability(0, 24)
-    storeA.set_availability(1, 24)
-    storeA.set_availability(2, 24) # take list as input too
+    storeA.set_availability('Ahmad', 24)
+    storeA.set_availability('Ali', 24)
+    storeA.set_availability('Ahsan', 24) # take list as input too?
     storeA.scheduler()
     storeA.view_schedule()
